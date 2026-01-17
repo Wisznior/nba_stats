@@ -1,0 +1,116 @@
+{% extends 'nba_app/base.html' %}
+
+{% block content %}
+<div class="mb-5 text-center">
+    <h2 class="fw-bold">Raporty Analityczne - Widoki</h2>
+</div>
+
+<!--raport-ile dolarow za punkt zawodnika-->
+<div class="card mb-5 shadow-sm border-0">
+    <div class="card-header bg-success text-white">
+        <h4 class="m-0"><i class="bi bi-cash-coin"></i> Efektywność Finansowa</h4>
+        <small>20 zawodników z najnizszym kosztem za 1 zdobyty punkt</small>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-striped table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Imię i Nazwisko</th>
+                    <th>Zespół</th>
+                    <th>Kontrakt</th>
+                    <th>Koszt 1 pkt</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for wiersz in moneyball %}
+                <tr>
+                    <td class="fw-bold">{{ wiersz.imie }} {{ wiersz.nazwisko }}</td>
+                    <td>{{ wiersz.zespol }}</td>
+                    <td>{{ wiersz.kontrakt }}$</td>
+                    <td class="text-success fw-bold">{{ wiersz.koszt_jednego_punktu }}$</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-4 text-muted">
+                        Brak danych. Sprawdź czy tabela 'kontrakty' i 'statystyki' są wypełnione.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!--raport meczy u siebie-->
+<div class="card mb-5 shadow-sm border-0">
+    <div class="card-header bg-primary text-white">
+        <h4 class="m-0"><i class="bi bi-house-door-fill"></i> Bilans Domowy</h4>
+        <small>Ranking wszystkich zespołów - od najlepszego bilansu</small>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-striped table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Zespół</th>
+                    <th class="text-center">Mecze Dom</th>
+                    <th class="text-center">Wygrane Dom</th>
+                    <th class="text-center">Procent Wygranych w Domu</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for wiersz in twierdza %}
+                <tr>
+                    <td class="fw-bold">{{ wiersz.nazwa }}</td>
+                    <td class="text-center">{{ wiersz.mecze_dom }}</td>
+                    <td class="text-center text-primary fw-bold">{{ wiersz.wygrane_dom }}</td>
+                    <td class="text-center fw-bold">{{ wiersz.procent_wygranych_dom }}%</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-4 text-muted">
+                        Brak danych. Tabela mecze - pusta.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Raport Szpital - koszt kontuzji -->
+<div class="card mb-5 shadow-sm border-0">
+    <div class="card-header bg-danger text-white">
+        <h4 class="m-0"><i class="bi bi-hospital"></i> Raport Szpital</h4>
+        <small>Zespoły z najwyższymi kosztami kontuzji</small>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-striped table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Zespół</th>
+                    <th class="text-center">Liczba Kontuzjowanych</th>
+                    <th class="text-end">Suma Kontraktów Kontuzjowanych</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for wiersz in szpital %}
+                <tr>
+                    <td class="fw-bold">{{ wiersz.nazwa }}</td>
+                    <td class="text-center">{{ wiersz.liczba_kontuzjowanych }}</td>
+                    <td class="text-end text-danger fw-bold">
+                        ${{ wiersz.zamrozone_pieniadze|floatformat:2 }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center py-4 text-muted">
+                        Brak aktywnych kontuzji w systemie.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

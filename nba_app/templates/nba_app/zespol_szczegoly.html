@@ -1,0 +1,315 @@
+{% extends 'nba_app/base.html' %}
+
+{% block content %}
+<!--nagłówek-->
+<div class="card mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="card-body text-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-4 fw-bold mb-0">{{ zespol.nazwa }}</h1>
+                <p class="lead mb-0"><i class="bi bi-geo-alt-fill"></i> {{ zespol.miasto }}</p>
+            </div>
+            <div class="text-end">
+                <!--<div class="display-1 opacity-75">{{ zespol.skrot }}</div>-->
+                <img src="https://cdn.nba.com/logos/nba/{{zespol.id_zespolu}}/primary/L/logo.svg" alt="{{ zespol.nazwa }}" style="height: 100; width: auto; max-width: 100%; object-fit: contain;">
+                <span class="badge bg-light text-dark fs-6">{{ zespol.konferencja }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--statystyki-->
+{% if statystyki %}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Bilans</h6>
+                <h2 class="card-title text-success">{{ statystyki.wygrane }}-{{ statystyki.przegrane }}</h2>
+                <p class="text-muted small">{{ statystyki.mecze_rozegrane }} meczów</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">% Wygranych</h6>
+                <h2 class="card-title">{{ statystyki.procent_wygranych|floatformat:1 }}%</h2>
+                {% if pozycja_w_tabeli %}
+                <p class="text-muted small">{{ pozycja_w_tabeli.konferencja }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Bilans Domowy</h6>
+                <h2 class="card-title text-primary">{{ statystyki.wygrane_dom }}-{{ statystyki.przegrane_dom }}</h2>
+                <p class="text-muted small">{{ statystyki.mecze_dom }} meczów</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Bilans Wyjazdowy</h6>
+                <h2 class="card-title text-warning">{{ statystyki.wygrane_wyjazd }}-{{ statystyki.przegrane_wyjazd }}</h2>
+                <p class="text-muted small">{{ statystyki.mecze_wyjazd }} meczów</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> Brak statystyk dla sezonu {{ sezon }}
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-8">
+        
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-people-fill"></i> Kadra ({{ zawodnicy|length }} zawodników)</h5>
+            </div>
+            <div class="card-body">
+                {% if zawodnicy %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Zawodnik</th>
+                                <th>Kraj</th>
+                                <th class="text-end">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for zawodnik in zawodnicy %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    <a href="{% url 'szczegoly_zawodnika' zawodnik.id_zawodnika %}" class="text-decoration-none fw-bold">
+                                        {{ zawodnik.imie }} {{ zawodnik.nazwisko }}
+                                    </a>
+                                </td>
+                                <td>{{ zawodnik.kraj_pochodzenia }}</td>
+                                <td class="text-end">
+                                    {% if zawodnik.czy_aktywny %}
+                                    <span class="badge bg-success">Aktywny</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Nieaktywny</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">Brak zawodników w bazie dla tego zespołu (sezon {{ sezon }})</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-person-badge-fill"></i> Sztab Szkoleniowy</h5>
+            </div>
+            <div class="card-body">
+                {% if trenerzy %}
+                <ul class="list-group list-group-flush">
+                    {% for trener_info in trenerzy %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ trener_info.0.imie }} {{ trener_info.0.nazwisko }}</strong>
+                        </div>
+                        {% if trener_info.1 %}
+                        <span class="badge bg-primary">Trener Główny</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Asystent</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted mb-0">Brak informacji o trenerach (sezon {{ sezon }})</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-calendar-event-fill"></i> Ostatnie Mecze</h5>
+            </div>
+            <div class="card-body">
+                {% if ostatnie_mecze %}
+                <div class="list-group list-group-flush">
+                    {% for mecz in ostatnie_mecze %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">{{ mecz.data_meczu }}</small>
+                                <div class="mt-1">
+                                    {% if mecz.id_zespolu_gospodarz.id_zespolu == zespol.id_zespolu %}
+                                        <strong>{{ mecz.id_zespolu_gospodarz.skrot }}</strong> {{ mecz.wynik_gospodarz }} - {{ mecz.wynik_gosc }} {{ mecz.id_zespolu_gosc.skrot }}
+                                        {% if mecz.wynik_gospodarz > mecz.wynik_gosc %}
+                                        <span class="badge bg-success ms-2">W</span>
+                                        {% else %}
+                                        <span class="badge bg-danger ms-2">L</span>
+                                        {% endif %}
+                                    {% else %}
+                                        {{ mecz.id_zespolu_gospodarz.skrot }} {{ mecz.wynik_gospodarz }} - {{ mecz.wynik_gosc }} <strong>{{ mecz.id_zespolu_gosc.skrot }}</strong>
+                                        {% if mecz.wynik_gosc > mecz.wynik_gospodarz %}
+                                        <span class="badge bg-success ms-2">W</span>
+                                        {% else %}
+                                        <span class="badge bg-danger ms-2">L</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div>
+                                {% if mecz.id_zespolu_gospodarz.id_zespolu == zespol.id_zespolu %}
+                                    <span class="badge bg-light text-dark">DOM</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">WYJAZD</span>
+                                {% endif %}
+                            </div>
+                            <a href="{% url 'szczegoly_meczu' mecz.id_meczu %}" class="btn btn-sm btn-nba">
+                                <i class="bi bi-eye"></i> Zobacz mecz
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">Brak rozegranych meczów</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+        
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-trophy-fill"></i> Najlepsi Strzelcy</h5>
+            </div>
+            <div class="card-body">
+                {% if najlepsi_strzelcy %}
+                <div class="list-group list-group-flush">
+                    {% for strzelec in najlepsi_strzelcy %}
+                    <a href="{% url 'szczegoly_zawodnika' strzelec.id_zawodnika__id_zawodnika %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold">{{ forloop.counter }}. {{ strzelec.id_zawodnika__imie }} {{ strzelec.id_zawodnika__nazwisko }}</div>
+                                <small class="text-muted">{{ strzelec.mecze }} meczów</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="h5 mb-0 text-warning">{{ strzelec.suma_punktow }}</div>
+                                <small class="text-muted">{{ strzelec.srednia|floatformat:1 }} PPG</small>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">Brak danych statystycznych</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if pozycja_w_tabeli %}
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-bar-chart-fill"></i> Pozycja w Tabeli</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <div class="display-4 text-info fw-bold">#{{ pozycja_w_tabeli.pozycja_konf }}</div>
+                    <p class="text-muted mb-0">w konferencji {{ pozycja_w_tabeli.konferencja }}</p>
+                </div>
+                <hr>
+                <div class="text-center mb-3">
+                    <div class="h3 text-secondary">#{{ pozycja_w_tabeli.pozycja_ogolna }}</div>
+                    <p class="text-muted mb-0">w całej lidze</p>
+                </div>
+                <hr>
+                <div class="text-center">
+                    <h4 class="mb-0">{{ pozycja_w_tabeli.wygrane }}-{{ pozycja_w_tabeli.przegrane }}</h4>
+                    <p class="text-muted">{{ pozycja_w_tabeli.pct }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle-fill"></i> Informacje</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Pełna nazwa:</dt>
+                    <dd class="col-sm-7">{{ zespol.nazwa }}</dd>
+                    
+                    <dt class="col-sm-5">Miasto:</dt>
+                    <dd class="col-sm-7">{{ zespol.miasto }}</dd>
+                    
+                    <dt class="col-sm-5">Skrót:</dt>
+                    <dd class="col-sm-7"><span class="badge bg-dark">{{ zespol.skrot }}</span></dd>
+                    
+                    <dt class="col-sm-5">Konferencja:</dt>
+                    <dd class="col-sm-7">{{ zespol.konferencja }}</dd>
+                    
+                    <dt class="col-sm-5">Sezon:</dt>
+                    <dd class="col-sm-7 mb-0">{{ sezon }}</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-bandaid-fill"></i> Kontuzje ({{ kontuzje|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if kontuzje %}
+                <div class="list-group list-group-flush">
+                    {% for kontuzja in kontuzje %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <a href="{% url 'szczegoly_zawodnika' kontuzja.id_zawodnika.id_zawodnika %}" class="fw-bold text-decoration-none">
+                                    {{ kontuzja.id_zawodnika.imie }} {{ kontuzja.id_zawodnika.nazwisko }}
+                                </a>
+                                <p class="mb-1 small text-muted">{{ kontuzja.opis_kontuzji|truncatewords:10 }}</p>
+                                {% if kontuzja.przewidywany_powrot %}
+                                <small class="text-success">
+                                    <i class="bi bi-calendar-check"></i> Powrót: {{ kontuzja.przewidywany_powrot }}
+                                </small>
+                                {% endif %}
+                            </div>
+                            <span class="badge bg-warning text-dark">{{ kontuzja.status|default:"Kontuzjowany" }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0 text-center">
+                    <i class="bi bi-check-circle text-success"></i> Brak aktywnych kontuzji
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="mt-4">
+    <a href="{% url 'lista_zespolow' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Powrót do listy zespołów
+    </a>
+</div>
+
+{% endblock %}

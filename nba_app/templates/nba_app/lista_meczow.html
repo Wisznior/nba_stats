@@ -1,0 +1,163 @@
+{% extends 'nba_app/base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="display-4"><i class="bi bi-dribbble"></i> Mecze Sezon 2025-26</h1>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="bi bi-funnel"></i> Filtruj mecze</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{% url 'lista_meczow' %}">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="zespol" class="form-label">Zespół</label>
+                    <select name="zespol" id="zespol" class="form-select">
+                        <option value="">Wszystkie zespoły</option>
+                        {% for zespol in zespoly %}
+                            <option value="{{ zespol.id_zespolu }}" 
+                                {% if zespol_filter|stringformat:"s" == zespol.id_zespolu|stringformat:"s" %}selected{% endif %}>
+                                {{ zespol.nazwa }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label for="data_od" class="form-label">Data od</label>
+                    <input type="date" name="data_od" id="data_od" class="form-control" value="{{ data_od }}">
+                </div>
+
+                <div class="col-md-2">
+                    <label for="data_do" class="form-label">Data do</label>
+                    <input type="date" name="data_do" id="data_do" class="form-control" value="{{ data_do }}">
+                </div>
+
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-nba w-100 me-2">
+                        <i class="bi bi-search"></i> Szukaj
+                    </button>
+                    <a href="{% url 'lista_meczow' %}" class="btn btn-secondary text-nowrap">
+                        <i class="bi bi-x"></i>Wyczyść filtry
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5><i class="bi bi-list-ul"></i> Lista meczów</h5>
+    </div>
+    <div class="card-body p-0">
+        {% if page_obj %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="thead-nba">
+                    <tr>
+                        <th>Data</th>
+                        <th>Sezon</th>
+                        <th class="text-end">Gospodarz</th>
+                        <th class="text-center">Wynik</th>
+                        <th>Gość</th>
+                        <th class="text-center">Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mecz in page_obj %}
+                    <tr>
+                        <td class="py-3 align-middle">
+                            <strong>{{ mecz.data_meczu|date:"d.m.Y" }}</strong><br>
+                        </td>
+                        <td class="align-middle">
+                            <span class="badge bg-secondary">{{ mecz.id_sezonu.kod_sezonu }}</span>
+                        </td>
+                        <td class="text-end align-middle">
+                            <a href="{% url 'szczegoly_zespolu' mecz.id_zespolu_gospodarz.id_zespolu %}" 
+                               class="text-decoration-none">
+                                <strong>{{ mecz.id_zespolu_gospodarz.nazwa }}</strong>
+                            </a>
+                            <br>
+                        </td>
+                        <td class="text-center align-middle">
+                            {% if mecz.wynik_gospodarz > mecz.wynik_gosc %}
+                                <span class="badge bg-success fs-6">{{ mecz.wynik_gospodarz }}</span>
+                                <span class="badge bg-danger fs-6">{{ mecz.wynik_gosc }}</span>
+                            {% else %}
+                                <span class="badge bg-danger fs-6">{{ mecz.wynik_gospodarz }}</span>
+                                <span class="badge bg-success fs-6">{{ mecz.wynik_gosc }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="align-middle">
+                            <a href="{% url 'szczegoly_zespolu' mecz.id_zespolu_gosc.id_zespolu %}" 
+                               class="text-decoration-none">
+                                <strong>{{ mecz.id_zespolu_gosc.nazwa }}</strong>
+                            </a>
+                            <br>
+                        </td>
+                        <td class="text-center align-middle">
+                            <a href="{% url 'szczegoly_meczu' mecz.id_meczu %}" 
+                               class="btn btn-sm btn-nba">
+                                <i class="bi bi-eye"></i> Statystyki
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginacja -->
+        {% if page_obj.has_other_pages %}
+        <div class="card-footer">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if sezon_filter %}&sezon={{ sezon_filter }}{% endif %}{% if zespol_filter %}&zespol={{ zespol_filter }}{% endif %}{% if data_od %}&data_od={{ data_od }}{% endif %}{% if data_do %}&data_do={{ data_do }}{% endif %}">
+                                Pierwsza <<
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if sezon_filter %}&sezon={{ sezon_filter }}{% endif %}{% if zespol_filter %}&zespol={{ zespol_filter }}{% endif %}{% if data_od %}&data_od={{ data_od }}{% endif %}{% if data_do %}&data_do={{ data_do }}{% endif %}">
+                                Poprzednia <
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">
+                            Strona {{ page_obj.number }} z {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if sezon_filter %}&sezon={{ sezon_filter }}{% endif %}{% if zespol_filter %}&zespol={{ zespol_filter }}{% endif %}{% if data_od %}&data_od={{ data_od }}{% endif %}{% if data_do %}&data_do={{ data_do }}{% endif %}">
+                                Następna >
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if sezon_filter %}&sezon={{ sezon_filter }}{% endif %}{% if zespol_filter %}&zespol={{ zespol_filter }}{% endif %}{% if data_od %}&data_od={{ data_od }}{% endif %}{% if data_do %}&data_do={{ data_do }}{% endif %}">
+                                Ostatnia >>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="alert alert-info m-3">
+            <i class="bi bi-info-circle"></i> Nie znaleziono meczów spełniających kryteria.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

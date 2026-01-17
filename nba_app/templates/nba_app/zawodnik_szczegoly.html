@@ -1,0 +1,190 @@
+{% extends 'nba_app/base.html' %}
+
+{% block content %}
+<style>
+    table.dataTable thead .sorting:before,
+    table.dataTable thead .sorting:after,
+    table.dataTable thead .sorting_asc:before,
+    table.dataTable thead .sorting_asc:after,
+    table.dataTable thead .sorting_desc:before,
+    table.dataTable thead .sorting_desc:after {
+        display: none !important;
+    }
+
+    #statystykiGraczy thead th {
+        cursor: pointer;
+        transition: background-color 0.2s;
+        position: relative;
+        white-space: nowrap;
+    }
+
+    #statystykiGraczy thead th:hover {
+        background-color: white !important;
+        color: black;
+    }
+
+    #statystykiGraczy thead th.sorting_asc {
+        border-bottom: 3px solid green !important;
+    }
+    #statystykiGraczy thead th.sorting_desc {
+        border-bottom: 3px solid red !important;
+    }
+</style>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <a href="{% url 'lista_zawodnikow' %}" class="btn btn-outline-secondary mb-3">
+            <i class="bi bi-arrow-left"></i> Wróć do listy
+        </a>
+    </div>
+</div>
+
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-body bg-dark text-white rounded">
+        <div class="row align-items-center">
+            <div class="col-md-2 text-center">
+                <img src="https://cdn.nba.com/headshots/nba/latest/1040x760/{{zawodnik.id_zawodnika}}.png" alt="{{ zawodnik.nazwisko }}" style="height: 100px; width: auto; max-width: 100%; object-fit: contain;">
+            </div>
+            <div class="col-md-7">
+                <h1 class="fw-bold">{{ zawodnik.imie }} {{ zawodnik.nazwisko }}</h1>
+                {% if kontuzja_aktualna %}
+                <div class="alert alert-danger d-inline-block py-1 px-3 mb-2">
+                    <i class="bi bi-bandaid-fill"></i> 
+                    <strong>{{ kontuzja_aktualna.status }}</strong> - {{ kontuzja_aktualna.opis_kontuzji|truncatewords:5 }}
+                </div>
+                {% endif %}
+                <h4 style="color: var(--nba-orange);">{{ zespol }}</h4>
+                <p class="mb-0"><i class="bi bi-geo-alt"></i> {{ zawodnik.kraj_pochodzenia }}</p>
+            </div>
+            <div class="col-md-3 text-end">
+                <div class="p-3 rounded" style="background-color: rgba(255,255,255,0.1);">
+                    <small>Mecze w sezonie</small>
+                    <h2 class="fw-bold">{{ statystyki.mecze_rozegrane }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4 text-center justify-content-center">
+    <div class="col-md-2 col-sm-4 mb-3">
+        <div class="card h-100 border-warning shadow-sm">
+            <div class="card-body p-2">
+                <h6 class="text-muted text-uppercase small mt-2">PKT</h6>
+                <h2 class="fw-bold">{{ statystyki.srednia_pkt|default:"0.0"|floatformat:1 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 mb-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body p-2">
+                <h6 class="text-muted text-uppercase small mt-2">ZB</h6>
+                <h2 class="fw-bold">{{ statystyki.srednia_zb|default:"0.0"|floatformat:1 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 mb-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body p-2">
+                <h6 class="text-muted text-uppercase small mt-2">AST</h6>
+                <h2 class="fw-bold">{{ statystyki.srednia_ast|default:"0.0"|floatformat:1 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 mb-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body p-2">
+                <h6 class="text-muted text-uppercase small mt-2">PRZ</h6>
+                <h2 class="fw-bold">{{ statystyki.srednia_stl|default:"0.0"|floatformat:1 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 mb-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body p-2">
+                <h6 class="text-muted text-uppercase small mt-2">BLK</h6>
+                <h2 class="fw-bold">{{ statystyki.srednia_blk|default:"0.0"|floatformat:1 }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0 fw-bold text-black"><i class="bi bi-calendar-event"></i> Ostatnie mecze zawodnika: {{ zawodnik.imie }} {{ zawodnik.nazwisko }}</h5>
+    </div>
+    <div class="table-responsive">
+        <table id="statystykiGraczy" class="table table-hover mb-0 text-center align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Data</th>
+                    <th>Mecz</th>
+                    <th>MIN</th>
+                    <th>PKT</th>
+                    <th>AST</th>
+                    <th>ZB</th>
+                    <th>BLK</th>
+                    <th>STL</th>
+                    <th>+/-</th>
+                    <th>Statystyki meczu</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in mecze %}
+                <tr>
+                    <td data-order="{{ m.id_meczu.data_meczu|date:'Ymd' }}">{{ m.id_meczu.data_meczu|date:'d.m.Y' }}</td> 
+                    <td><small class="text-muted">{{ m.id_meczu.id_zespolu_gospodarz.skrot }} vs {{ m.id_meczu.id_zespolu_gosc.skrot }}</small></td>
+                    
+                    <td class="time-col">{{ m.czas_gry }}</td>
+                    
+                    <td class="fw-bold text-dark">{{ m.punkty }}</td>
+                    <td>{{ m.asysty }}</td>
+                    <td>{{ m.zbiorki }}</td>
+                    <td>{{ m.bloki }}</td>
+                    <td>{{ m.przechwyty }}</td>
+                    <td data-order="{{ m.plus_minus }}">
+                        {% if m.plus_minus > 0 %}<span class="text-success fw-bold">+{{ m.plus_minus }}</span>
+                        {% elif m.plus_minus < 0 %}<span class="text-danger fw-bold">{{ m.plus_minus }}</span>
+                        {% else %}<span class="text-muted">0</span>{% endif %}
+                    </td>
+                    <td>
+                        <a href = "{% url 'szczegoly_meczu' m.id_meczu.id_meczu %}" class="btn btn-sm btn-nba">
+                            <i class="bi bi-eye"></i> Zobacz mecz
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $.fn.dataTable.ext.type.order['time-grade-pre'] = function ( d ) {
+        if (!d || d === "None") return 0;
+        var a = d.split(':');
+        if (a.length < 2) return parseInt(d) || 0;
+        return (parseInt(a[0]) * 60) + parseInt(a[1]);
+    };
+
+    $('#statystykiGraczy').DataTable({
+        "paging": false,
+        "searching": false,
+        "info": false,
+        "order": [[0, "desc"]], 
+        "columnDefs": [
+            { "type": "time-grade", "targets": 2 },
+            { "type": "num", "targets": [3, 4, 5, 6, 7] },
+            { "targets": 8, "type": "num"}
+        ],
+        "language": { "emptyTable": "Brak danych" }
+    });
+});
+</script>
+
+{% endblock %}

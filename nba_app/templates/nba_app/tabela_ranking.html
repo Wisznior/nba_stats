@@ -1,0 +1,71 @@
+{% extends 'nba_app/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-center text-uppercase fw-bold" style="color: var(--nba-orange, #fa5500);">Ranking NBA</h1>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <h3 class="p-2 text-center text-white text-uppercase fw-bold" style="background-color: #0056b3; font-size: 1.2rem;">
+                <i class="bi bi-compass me-2"></i> Konferencja Wschodnia
+            </h3>
+            
+            <table class="table table-hover table-striped align-middle border">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col"></th>
+                        <th scope="col">Zespół</th>
+                        <th scope="col" class="text-end">W</th>
+                        <th scope="col" class="text-end">P</th>
+                        <th scope="col" class="text-end pe-3">%</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in ranking_east %}
+                    <tr>
+                        <td class="fw-bold text-secondary">{{ forloop.counter }}</td>
+                        <td class="fw-bold">{{ r.zespol }}</td>
+                        <td class="text-end text-success fw-bold">{{ r.wygrane }}</td>
+                        <td class="text-end text-danger">{{ r.przegrane }}</td>
+                        <td class="text-end pe-3 fw-bold">{{ r.pct }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center">Brak danych</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <h3 class="p-2 text-center text-white text-uppercase fw-bold" style="background-color: #c9082a; font-size: 1.2rem;">
+                <i class="bi bi-compass me-2"></i> Konferencja Zachodnia
+            </h3>
+            
+            <table class="table table-hover table-striped align-middle border">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col"></th>
+                        <th scope="col">Zespół</th>
+                        <th scope="col" class="text-end">W</th>
+                        <th scope="col" class="text-end">P</th>
+                        <th scope="col" class="text-end pe-3">%</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in ranking_west %}
+                    <tr>
+                        <td class="fw-bold text-secondary">{{ forloop.counter }}</td>
+                        <td class="fw-bold">{{ r.zespol }}</td>
+                        <td class="text-end text-success fw-bold">{{ r.wygrane }}</td>
+                        <td class="text-end text-danger">{{ r.przegrane }}</td>
+                        <td class="text-end pe-3 fw-bold">{{ r.pct }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center">Brak danych</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

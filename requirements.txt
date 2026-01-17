@@ -1,0 +1,5 @@
+psycopg2-binary
+nba_api
+pandas
+requests
+django
