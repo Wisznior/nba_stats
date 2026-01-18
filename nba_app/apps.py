@@ -10,7 +10,7 @@ class NbaAppConfig(AppConfig):
     def ready(self):
         if os.environ.get('RUN_MAIN', None) == 'true':    
             try:
-                from .. import updater
+                import updater
 
                 print("Inicjalizacja Harmonogramu NBA")
                 
