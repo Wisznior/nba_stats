@@ -1,7 +1,6 @@
 {% extends 'nba_app/base.html' %}
 
 {% block content %}
-<!-- Nagłówek meczu -->
 <div class="row mb-4">
     <div class="col">
         <a href="{% url 'lista_meczow' %}" class="btn btn-secondary mb-3">
@@ -14,11 +13,9 @@
     </div>
 </div>
 
-<!-- Wynik meczu -->
 <div class="card mb-4">
     <div class="card-body">
         <div class="row text-center">
-            <!-- Gospodarz -->
             <div class="col-md-5">
                 <a href="{% url 'szczegoly_zespolu' mecz.id_zespolu_gospodarz.id_zespolu %}" 
                    class="text-decoration-none">
@@ -30,12 +27,10 @@
                 </h1>
             </div>
 
-            <!-- VS -->
             <div class="col-md-2 d-flex align-items-center justify-content-center">
                 <h2 class="text-muted">VS</h2>
             </div>
 
-            <!-- Gość -->
             <div class="col-md-5">
                 <a href="{% url 'szczegoly_zespolu' mecz.id_zespolu_gosc.id_zespolu %}" 
                    class="text-decoration-none">
@@ -48,7 +43,6 @@
             </div>
         </div>
 
-        <!-- Podsumowanie statystyk zespołowych -->
         <hr class="my-4">
         <div class="row text-center">
             <div class="col-md-5">
@@ -106,7 +100,6 @@
     </div>
 </div>
 
-<!-- Statystyki zawodników gospodarzy -->
 <div class="card mb-4">
     <div class="card-header">
         <h5><i class="bi bi-people"></i> Statystyki zawodników: {{ mecz.id_zespolu_gospodarz.nazwa }}</h5>
@@ -170,7 +163,6 @@
     </div>
 </div>
 
-<!-- Statystyki zawodników gości -->
 <div class="card mb-4">
     <div class="card-header">
         <h5><i class="bi bi-people"></i> Statystyki zawodników: {{ mecz.id_zespolu_gosc.nazwa }}</h5>
