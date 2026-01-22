@@ -9,7 +9,7 @@ class NbaAppConfig(AppConfig):
 
     def ready(self):
         if os.environ.get('RUN_MAIN', None) == 'true':    
-            #try:
+            try:
                 import updater
 
                 print("Inicjalizacja Harmonogramu NBA")
@@ -21,5 +21,5 @@ class NbaAppConfig(AppConfig):
             #except ImportError:
             #    print("\nNie znaleziono pliku updater.py")
                 
-            #except Exception as e:
-            #    print(f"\nNie udał+o się uruchomić: {e}\n")
+            except Exception as e:
+                print(f"\nNie udało się uruchomić: {e}\n")
